@@ -24,7 +24,6 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -351,14 +350,6 @@ func CollectFromReader(file io.Reader, ch chan<- prometheus.Metric) error {
 	return scanner.Err()
 }
 
-func CollectFromFile(path string, ch chan<- prometheus.Metric) error {
-	conn, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	return CollectFromReader(conn, ch)
-}
-
 func CollectFromSocket(socketFamily string, host string, tlsConfig *tls.Config, ch chan<- prometheus.Metric) error {
 	var (
 		conn net.Conn
@@ -456,7 +447,7 @@ func (e *UnboundExporter) Collect(ch chan<- prometheus.Metric) {
 			prometheus.GaugeValue,
 			1.0)
 	} else {
-		log.Error("Failed to scrape socket: %s", err)
+		log.Errorf("Failed to scrape socket: %s", err)
 		ch <- prometheus.MustNewConstMetric(
 			unboundUpDesc,
 			prometheus.GaugeValue,
